@@ -8,7 +8,7 @@ use clap::Parser;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// The name of the scheduler, in the case more than one are running.
+    /// The name of the scheduler, in the case more than one is running.
     #[arg(short, long, default_value = "default")]
     name: String,
     /// Optionally output just the "used" or "free" jobs

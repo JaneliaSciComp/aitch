@@ -10,7 +10,7 @@ use clap::Parser;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// The name of the scheduler, in the case more than one are running.  Default is all.
+    /// The name of the scheduler, in the case more than one is running.  Default is all.
     #[arg(short, long)]
     name: Option<Vec<String>>,
 }
@@ -38,7 +38,7 @@ fn main() {
         let reader = aitch::job_stack_reader(&mut path);
         path.pop();
 
-        let nslots_used: Vec<i32> = nslots_total.clone().into_iter()
+        let nslots_used: Vec<usize> = nslots_total.clone().into_iter()
                                                 .zip(nslots_free.clone())
                                                 .map(|(x, y)| x-y).collect();
 
@@ -47,9 +47,9 @@ fn main() {
         let mut pending = 0;
         let mut running = 0;
         for (i,line) in reader.lines().enumerate() {
-            match i % 8 {
-                7 => {
-                    if i==7 { continue; }
+            match i % 9 {
+                8 => {
+                    if i==8 { continue; }
                     pid = line.unwrap();
                     total += 1;
                     if pid == "" {

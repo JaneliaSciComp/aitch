@@ -6,6 +6,13 @@ arbitrary number of unique kinds of resources.  In effect it implements a
 counting semaphore for each resource and provides a means to adjust their
 values by non-negative integers.
 
+# Installation #
+
+Install rust as described [here](https://www.rust-lang.org/).  Build with
+`cargo build`.
+
+# Basic Usage #
+
 Say for example your machine has six cores and you want to batch a heterogeneous
 collection of jobs which require different numbers of cores:
 
@@ -67,3 +74,7 @@ hsubmit 1,0,3 --out stdout.txt -err stderr.txt log-the-results
 Besides the `hstart` and `hsubmit` commands, there are also `hjobs`, `hkill`,
 `hnslots`, `hstatus`, and `hstop`.  Usage information for each is displayed
 with the `--help` flag.
+
+# Development #
+
+Run tests with `cargo test`.

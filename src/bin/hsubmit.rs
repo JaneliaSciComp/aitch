@@ -10,7 +10,7 @@ use clap::Parser;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// The name of the scheduler, in the case more than one are running.
+    /// The name of the scheduler, in the case more than one is running.
     #[arg(short, long, default_value = "default")]
     name: String,
     /// VARIABLE=VALUE.  Set VARIABLE equal to VALUE when running command.  This option can be used multiple times.
@@ -46,7 +46,7 @@ fn main() {
     let nslots_required = args.nslots.split(',')
                                      .map(|x| x.parse::<i32>().unwrap())
                                      .zip(nslots_total.into_iter())
-                                     .map(|(x,y)| if x>=0 {x} else {y})
+                                     .map(|(x,y)| if x>=0 {x} else {y.try_into().unwrap()})
                                      .map(|x| x.to_string())
                                      .collect::<Vec<String>>()
                                      .join(",");
@@ -61,7 +61,7 @@ fn main() {
     let mut buffer = BufReader::new(fid);
     let mut first_line = String::new();
     buffer.read_line(&mut first_line).unwrap();
-    let id = (1+first_line.parse::<i32>().unwrap()).to_string();
+    let id = (1+first_line.parse::<usize>().unwrap()).to_string();
     path.pop();
 
     let out = match args.out {
@@ -98,6 +98,7 @@ fn main() {
     writeln!(f, "{}", out).unwrap();
     writeln!(f, "{}", err).unwrap();
     writeln!(f, "{}", dep).unwrap();
+    writeln!(f, "").unwrap();
     writeln!(f, "").unwrap();
     path.pop();
 

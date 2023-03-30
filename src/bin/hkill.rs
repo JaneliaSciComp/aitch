@@ -12,7 +12,7 @@ use clap::Parser;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// The name of the scheduler, in the case more than one are running.
+    /// The name of the scheduler, in the case more than one is running.
     #[arg(short, long, default_value = "default")]
     name: String,
     /// The identification number of the job of interest.
@@ -34,18 +34,18 @@ fn main() {
     let reader = aitch::job_stack_reader(&mut path);
 
     let mut id: String = "".to_string();
-    let mut nslots: String = "".to_string();
+    let mut queue: String = "".to_string();
     let mut foundone: bool = false;
     let r = RefreshKind::new();
     let r = r.with_processes(ProcessRefreshKind::everything());
     let sys = System::new_with_specifics(r);
 
     for (i,line) in reader.lines().enumerate() {
-        match i % 8 {
+        match i % 9 {
             0 => { id = line.unwrap(); },
-            1 => { nslots = line.unwrap(); },
-            7 => {
-                if i==7 { continue; }
+            7 => { queue = line.unwrap(); },
+            8 => {
+                if i==8 { continue; }
                 let cloned_line = line.unwrap().clone();
                 if cloned_line == "" { continue; }
                 let pid = Pid::from_str(&cloned_line).unwrap();
@@ -60,10 +60,7 @@ fn main() {
                         }
                         None => {
                             if args.force {
-                                let nslots_required = nslots.clone()
-                                                            .split(",")
-                                                            .map(|x| x.parse::<i32>().unwrap()).collect();
-                                aitch::update_nslots_free(&mut path, nslots_required);
+                                aitch::update_slot_availability(&mut path, &queue, false);
                                 aitch::delete_job_from_stack(&mut path, id);
                             } else {
                                 eprintln!("couldn't find PID.  use --force to delete job from aitch's stack");

@@ -53,14 +53,13 @@ fn not_running() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "not_running"])
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     assert_eq!(true, predicate_fn.eval(&path));
     let predicate_fn = predicate::path::is_file();
-    path.push("job_stack");     assert_eq!(true, predicate_fn.eval(&path));  path.pop();
-    path.push("last_jobid");    assert_eq!(true, predicate_fn.eval(&path));  path.pop();
-    path.push("nslots_free");   assert_eq!(true, predicate_fn.eval(&path));  path.pop();
-    path.push("nslots_total");  assert_eq!(true, predicate_fn.eval(&path));  path.pop();
+    path.push("job_stack");           assert_eq!(true, predicate_fn.eval(&path));  path.pop();
+    path.push("last_jobid");          assert_eq!(true, predicate_fn.eval(&path));  path.pop();
+    path.push("slot_availability");   assert_eq!(true, predicate_fn.eval(&path));  path.pop();
 
     let mut cmd = Command::cargo_bin("hstop")?;
     cmd.args(["--name", "not_running"])
@@ -89,7 +88,7 @@ fn one_short_job() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "one_short_job"])
        .arg("1")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hnslots")?;
     cmd.args(["--name", "one_short_job"])
@@ -147,7 +146,7 @@ fn one_long_job() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "one_long_job"])
        .arg("1")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "one_long_job"])
@@ -207,7 +206,7 @@ fn two_jobs() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "two_jobs"])
        .arg("1")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "two_jobs"])
@@ -293,7 +292,7 @@ fn two_slots() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "two_slots"])
        .arg("2")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "two_slots"])
@@ -386,7 +385,7 @@ fn a_dependent_job() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "a_dependent_job"])
        .arg("2")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "a_dependent_job"])
@@ -475,7 +474,7 @@ fn two_queues() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "two_queues"])
        .arg("1,1")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "two_queues"])
@@ -568,7 +567,7 @@ fn redirect() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "redirect"])
        .arg("1")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let tmpdir = env::temp_dir();
     let mut path = PathBuf::from(&tmpdir);
@@ -607,7 +606,7 @@ fn envvar() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "envvar"])
        .arg("1")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "envvar"])
@@ -656,7 +655,7 @@ fn envvar_with_islot() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "envvar_with_islot"])
        .arg("3,2")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "envvar_with_islot"])
@@ -729,7 +728,7 @@ fn kill() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "kill"])
        .arg("1")
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
     cmd.args(["--name", "kill"])
@@ -771,7 +770,7 @@ fn two_schedulers() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "first_scheduler"])
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hstatus")?;
     cmd.args(["--name", "first_scheduler"])
@@ -783,7 +782,7 @@ fn two_schedulers() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd = Command::cargo_bin("hstart")?;
     cmd.args(["--name", "second_scheduler"])
-       .assert().success().stdout(predicate::str::contains("scheduler with nslots_total"));
+       .assert().success().stdout(predicate::str::contains("scheduler with nslots"));
 
     let mut cmd = Command::cargo_bin("hstatus")?;
     cmd.args(["--name", "first_scheduler", "--name", "second_scheduler"])

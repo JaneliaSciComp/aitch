@@ -24,7 +24,7 @@ fn main() {
 
     let mut file = aitch::lock_state(&mut path);
     let nslots_free = aitch::get_nslots_free(&mut path);
-    let nslots_total = aitch::get_nslots_total(&mut path);
+    let slot_availability = aitch::get_slot_availability(&mut path);
     let reader = aitch::job_stack_reader(&mut path);
 
     let mut id: String = "".to_string();
@@ -38,15 +38,13 @@ fn main() {
     let mut lines = Vec::new();
     let mut foundone: bool = false;
     let mut nslots_required = Vec::new();
-    let mut nslots_in_excess = Vec::new();
 
     // scan stack for a job which fits in the free slots
     let mut prior_jobs = HashSet::new();
     for (i,line) in reader.lines().enumerate() {
         lines.push(line.as_ref().unwrap().clone());
-        //lines.push(line.unwrap().clone());
         if !foundone {
-            match i % 8 {
+            match i % 9 {
                 0 => { id = line.unwrap(); },
                 1 => { nslots = line.unwrap(); },
                 2 => { command = line.unwrap(); },
@@ -54,21 +52,22 @@ fn main() {
                 4 => { out = line.unwrap(); },
                 5 => { err = line.unwrap(); },
                 6 => { dep = line.unwrap().split(" ").map(|x| x.to_string()).collect(); },
-                7 => {
-                    if i==7 { continue; }
+                7 => {},  // queue
+                8 => {
+                    if i==8 { continue; }
                     prior_jobs.insert(id.clone());
                     if prior_jobs.intersection(&dep).collect::<Vec<&String>>().len() > 0 {
                         continue;
                     }
                     pid = line.unwrap();
-                    nslots_required = nslots.clone()
-                                            .split(",")
-                                            .map(|x| x.parse::<i32>().unwrap()).collect();
-                    nslots_in_excess = nslots_free.clone().into_iter()
-                                                  .zip(nslots_required.clone())
-                                                  .map(|(x, y)| x-y).collect();
-                    if pid=="" && nslots_in_excess.clone().into_iter().all(|x| x>=0) {
-                        foundone = true
+                    if pid=="" {
+                        nslots_required = nslots.clone()
+                                                .split(",")
+                                                .map(|x| x.parse::<usize>().unwrap()).collect();
+                        foundone = nslots_free.clone().into_iter()
+                                              .zip(nslots_required.clone())
+                                              .map(|(x, y)| if x>=y {true} else {false})
+                                              .all(|x| x);
                     }
                 }
                 _ => {}
@@ -84,18 +83,32 @@ fn main() {
         let mut cmd = Command::new(exe);
 
         let mut env_vars = HashMap::new();
+        let mut queue = String::new();
 
         // set QUEUE environment variables
-        let queue = String::from("QUEUE");
-        let r: Vec<i32> = nslots_required.clone();
-        let t: Vec<i32> = nslots_total;
-        for (islot,e) in nslots_in_excess.clone().into_iter().enumerate() {
+        #[allow(non_snake_case)]
+        let QUEUE = String::from("QUEUE");
+        for (iqueue,_n) in nslots_required.iter().enumerate() {
             let mut q = String::new();
-            q += &queue;
-            q += &islot.to_string();
-            let v: Vec<i32> = (t[islot]-e-r[islot]..t[islot]-e).collect();
-            env_vars.insert(q, v.iter().map(|x| x.to_string()).collect::<Vec<_>>().join(","));
+            q += &QUEUE;
+            q += &iqueue.to_string();
+            let mut iter = slot_availability[iqueue].iter();
+            let mut slots = Vec::<usize>::new();
+            let mut n = _n.clone();
+            while n>0 {
+                let mut i = iter.position(|x| !x).unwrap();
+                if slots.len() > 0 {
+                    i = i + slots.last().unwrap() + 1;
+                }
+                slots.push(i);
+                n -= 1
+            }
+            let slots_str = slots.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(",");
+            queue += &slots_str;
+            queue += ";";
+            env_vars.insert(q, slots_str);
         }
+        queue.pop();
 
         // set user-supplied environment variables
         if var != "" {
@@ -129,13 +142,9 @@ fn main() {
         match cmd.spawn() {
             Ok(mut proc) => {
                 // update nslots_free
-                path.push("nslots_free");
-                fs::write(&path, &nslots_in_excess.clone().into_iter()
-                                                  .map(|x| x.to_string()).collect::<Vec<_>>()
-                                                  .join(",")).unwrap();
-                path.pop();
+                aitch::update_slot_availability(&mut path, &queue, true);
 
-                // update job_stack with PID
+                // update job_stack with queue and PID
                 path.push("job_stack");
                 let job_stack = fs::File::create(&path).unwrap();
                 path.pop();
@@ -146,7 +155,7 @@ fn main() {
                 loop {
                     line = lines_iter.next();
                     if line.is_none() { break; }
-                    if iline % 8 == 0 && *line.unwrap() == id {
+                    if iline % 9 == 0 && *line.unwrap() == id {
                         writeln!(writer, "{}", line.unwrap()).unwrap();
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
@@ -154,9 +163,11 @@ fn main() {
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
-                        lines_iter.next();
+                        writeln!(writer, "{}", queue).unwrap();
                         writeln!(writer, "{}", proc.id().to_string()).unwrap();
-                        iline += 8;
+                        lines_iter.next();
+                        lines_iter.next();
+                        iline += 9;
                     } else {
                         writeln!(writer, "{}", line.unwrap()).unwrap();
                         iline += 1;
@@ -170,7 +181,7 @@ fn main() {
                 file.lock().unwrap();
 
                 // update nslots_free
-                aitch::update_nslots_free(&mut path, nslots_required);
+                aitch::update_slot_availability(&mut path, &queue, false);
 
                 // run scheduler
                 Command::new("hschedule").arg(&args.name).spawn().unwrap();

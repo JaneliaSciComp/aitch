@@ -15,7 +15,7 @@ use clap::{Parser, ArgGroup};
 #[command(author, version, about, long_about = None)]
 #[command(group(ArgGroup::new("vers") .args(["name", "all"])))]
 struct Args {
-    /// The name of the scheduler, in the case more than one are running.
+    /// The name of the scheduler, in the case more than one is running.
     #[arg(short, long, default_value = "default")]
     name: Option<Vec<String>>,
     /// Stop every scheduler.  Mutually exclusive with --name.
@@ -50,9 +50,9 @@ fn main() {
         let sys = System::new_all();
 
         for (i,line) in reader.lines().enumerate() {
-            match i % 8 {
-                7 => {
-                    if i==7 { continue; }
+            match i % 9 {
+                8 => {
+                    if i==8 { continue; }
                     let cloned_line = line.unwrap().clone();
                     if !args.force {
                         eprintln!("jobs are still queued.  use --force to stop anyway");
