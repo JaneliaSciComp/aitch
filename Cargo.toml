@@ -1,9 +1,12 @@
 [package]
 name = "aitch"
 authors = ["Benjamin J. Arthur <bjarthur70@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A scheduler for jobs allocating heterogenous resources on a single machine"
+readme = "README.md"
+license-file = "LICENSE.txt"
+repository = "https://github.com/JaneliaSciComp/aitch"
 
 [dependencies]
 clap = { version = "4.0.26", features = ["derive"] }
