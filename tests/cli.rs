@@ -10,6 +10,15 @@ use std::{
     fs::File,
 };
 
+fn wait_for_all_jobs_to_finish(mut cmd: Command) {
+    let mut n = 0;
+    while n<10 && cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).status().unwrap().success() {
+        thread::sleep(time::Duration::from_secs(1));
+        n += 1;
+    }
+    assert_ne!(n, 10);
+}
+
 #[test]
 fn not_running() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("hstop")?;
@@ -160,6 +169,8 @@ fn one_long_job() -> Result<(), Box<dyn std::error::Error>> {
                        .spawn().unwrap();
     assert_stdout(&mut child, "1\n");
 
+    thread::sleep(time::Duration::from_secs(1));
+       
     let mut cmd = Command::cargo_bin("hjobs")?;
     cmd.args(["--name", "one_long_job"])
        .assert().success().stdout(predicate::str::contains("\n").count(2));
@@ -179,12 +190,7 @@ fn one_long_job() -> Result<(), Box<dyn std::error::Error>> {
        .arg("1");
     cmd.assert().success().stdout(predicate::str::contains("\n").count(2));
 
-    let mut n = 0;
-    while n<10 && cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).status().unwrap().success() {
-        thread::sleep(time::Duration::from_secs(1));
-        n += 1;
-    }
-    assert_ne!(n, 10);
+    wait_for_all_jobs_to_finish(cmd);
 
     let mut cmd = Command::cargo_bin("hjobs")?;
     cmd.args(["--name", "one_long_job"])
@@ -242,6 +248,8 @@ fn two_jobs() -> Result<(), Box<dyn std::error::Error>> {
                        .spawn().unwrap();
     assert_stdout(&mut child, "2\n");
 
+    thread::sleep(time::Duration::from_secs(1));
+       
     let mut cmd = Command::cargo_bin("hjobs")?;
     cmd.args(["--name", "two_jobs"])
        .assert().success().stdout(predicate::str::contains("\n").count(3));
@@ -261,12 +269,7 @@ fn two_jobs() -> Result<(), Box<dyn std::error::Error>> {
        .arg("2");
     cmd.assert().success().stdout(predicate::str::contains("\n").count(2));
 
-    let mut n = 0;
-    while n<10 && cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).status().unwrap().success() {
-        thread::sleep(time::Duration::from_secs(1));
-        n += 1;
-    }
-    assert_ne!(n, 10);
+    wait_for_all_jobs_to_finish(cmd);
 
     let predicate_fn = predicate::path::is_file();
     assert_eq!(true, predicate_fn.eval(&path));
@@ -354,16 +357,11 @@ fn two_slots() -> Result<(), Box<dyn std::error::Error>> {
        .arg("1");
     cmd.assert().success().stdout(predicate::str::contains("\n").count(2));
 
+    wait_for_all_jobs_to_finish(cmd);
+
     let predicate_fn = predicate::path::is_file();
     assert_eq!(true, predicate_fn.eval(&path));
     path.pop();
-
-    let mut n = 0;
-    while n<10 && cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).status().unwrap().success() {
-        thread::sleep(time::Duration::from_secs(1));
-        n += 1;
-    }
-    assert_ne!(n, 10);
 
     let mut cmd = Command::cargo_bin("hjobs")?;
     cmd.args(["--name", "two_slots"])
@@ -443,12 +441,7 @@ fn a_dependent_job() -> Result<(), Box<dyn std::error::Error>> {
        .arg("2");
     cmd.assert().success().stdout(predicate::str::contains("\n").count(2));
 
-    let mut n = 0;
-    while n<10 && cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).status().unwrap().success() {
-        thread::sleep(time::Duration::from_secs(1));
-        n += 1;
-    }
-    assert_ne!(n, 10);
+    wait_for_all_jobs_to_finish(cmd);
 
     let predicate_fn = predicate::path::is_file();
     assert_eq!(true, predicate_fn.eval(&path));
@@ -536,16 +529,11 @@ fn two_queues() -> Result<(), Box<dyn std::error::Error>> {
        .arg("1");
     cmd.assert().success().stdout(predicate::str::contains("\n").count(2));
 
+    wait_for_all_jobs_to_finish(cmd);
+
     let predicate_fn = predicate::path::is_file();
     assert_eq!(true, predicate_fn.eval(&path));
     path.pop();
-
-    let mut n = 0;
-    while n<10 && cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).status().unwrap().success() {
-        thread::sleep(time::Duration::from_secs(1));
-        n += 1;
-    }
-    assert_ne!(n, 10);
 
     let mut cmd = Command::cargo_bin("hjobs")?;
     cmd.args(["--name", "two_queues"])
@@ -584,8 +572,11 @@ fn redirect() -> Result<(), Box<dyn std::error::Error>> {
                        .spawn().unwrap();
     assert_stdout(&mut child, "1\n");
 
-    thread::sleep(time::Duration::from_secs(1));
-       
+    let mut cmd = Command::cargo_bin("hjobs")?;
+    cmd.args(["--name", "redirect"])
+       .arg("1");
+    wait_for_all_jobs_to_finish(cmd);
+
     let predicate_fn = predicate::path::is_file();
     path.push("redirect.out");  assert_eq!(true, predicate_fn.eval(&path));  path.pop();
     path.push("redirect.err");  assert_eq!(true, predicate_fn.eval(&path));  path.pop();
@@ -620,7 +611,10 @@ fn envvar() -> Result<(), Box<dyn std::error::Error>> {
                        .spawn().unwrap();
     assert_stdout(&mut child, "1\n");
 
-    thread::sleep(time::Duration::from_secs(1));
+    let mut cmd = Command::cargo_bin("hjobs")?;
+    cmd.args(["--name", "envvar"])
+       .arg("1");
+    wait_for_all_jobs_to_finish(cmd);
        
     let tmpdir = env::temp_dir();
     let mut path = PathBuf::from(&tmpdir);
@@ -688,12 +682,7 @@ fn envvar_with_islot() -> Result<(), Box<dyn std::error::Error>> {
        .arg("1");
     cmd.assert().success().stdout(predicate::str::contains("\n").count(2));
        
-    let mut n = 0;
-    while n<10 && cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).status().unwrap().success() {
-        thread::sleep(time::Duration::from_secs(1));
-        n += 1;
-    }
-    assert_ne!(n, 10);
+    wait_for_all_jobs_to_finish(cmd);
 
     let tmpdir = env::temp_dir();
     let mut path = PathBuf::from(&tmpdir);
@@ -742,6 +731,8 @@ fn kill() -> Result<(), Box<dyn std::error::Error>> {
                        .spawn().unwrap();
     assert_stdout(&mut child, "1\n");
 
+    thread::sleep(time::Duration::from_secs(1));
+       
     let mut cmd = Command::cargo_bin("hjobs")?;
     cmd.args(["--name", "kill"])
        .assert().success().stdout(predicate::str::contains("\n").count(2));
