@@ -566,9 +566,14 @@ fn redirect() -> Result<(), Box<dyn std::error::Error>> {
     path.push("redirect.err");  let errfile = path.display().to_string();  path.pop();
 
     let mut cmd = Command::cargo_bin("hsubmit")?;
-    let mut child = cmd.args(["--name", "redirect"])
-                       .args(["1", "--out", outfile.as_str(), "--err", errfile.as_str(), "ls"])
-                       .stdout(Stdio::piped())
+    cmd.args(["--name", "redirect"])
+       .args(["1", "--out", outfile.as_str(), "--err", errfile.as_str()]);
+    if env::consts::OS == "windows" {
+        cmd.args(["powershell", "--", "-command", "ls"]);
+    } else {
+        cmd.arg("ls");
+    }
+    let mut child = cmd.stdout(Stdio::piped())
                        .spawn().unwrap();
     assert_stdout(&mut child, "1\n");
 
