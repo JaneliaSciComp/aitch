@@ -9,13 +9,13 @@ license-file = "LICENSE.txt"
 repository = "https://github.com/JaneliaSciComp/aitch"
 
 [dependencies]
-clap = { version = "4.0.26", features = ["derive"] }
+clap = { version = "4.2.1", features = ["derive"] }
 fslock = "0.2.1"
 itertools = "0.10.5"
 shell-words = "1.1.0"
-sysinfo = "0.26.7"
+sysinfo = "0.28.4"
 
 [dev-dependencies]
 assert_cmd = "2.0"
-predicates = "2.1"
+predicates = "3.0"
 assert_fs = "1.0"
