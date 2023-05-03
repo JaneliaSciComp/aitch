@@ -17,7 +17,10 @@ struct Args {
     name: String,
     /// The identification number of the job of interest.
     jobid: String,
-    /// Whether to remove a job from the stack if the PID can't be found
+    /// Send SIGKILL (instead of the default SIGTERM)
+    #[arg(short, long)]
+    kill: bool,
+    /// Whether to remove a job from aitch's stack if the PID can't be found
     #[arg(short, long)]
     force: bool,
 }
@@ -52,10 +55,14 @@ fn main() {
                 if id == args.jobid {
                     match sys.process(pid) {
                         Some(p) => {
-                            if let Some(_res) = p.kill_with(Kill) {
-                                //println!("kill: {res}");
+                            if args.kill {
+                                if p.kill_with(Kill).is_none() {
+                                    eprintln!("SIGKILL not supported on this platform");
+                                }
                             } else {
-                                eprintln!("kill: signal not supported on this platform");
+                                if p.kill_with(Term).is_none() {
+                                    eprintln!("SIGTERM not supported on this platform.  use --kill to send SIGKILL instead");
+                                }
                             }
                         }
                         None => {
