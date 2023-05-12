@@ -8,7 +8,7 @@ use std::{
 use clap::Parser;
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(version, about, long_about = "Add a new job to the queue.\n\nA detailed tutorial and the source code is at https://github.com/JaneliaSciComp/aitch\n\nSee also hjobs, hkill, hnslots, hstart, hstatus, and hstop.")]
 struct Args {
     /// The name of the scheduler, in the case more than one is running.
     #[arg(short, long, default_value = "default")]

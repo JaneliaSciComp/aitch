@@ -12,7 +12,7 @@ use sysinfo::{Pid, ProcessExt, System, SystemExt};
 use clap::{Parser, ArgGroup};
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(version, about, long_about = "Tear down a scheduler.\n\nA detailed tutorial and the source code is at https://github.com/JaneliaSciComp/aitch\n\nSee also hjobs, hkill, hnslots, hstart, hstatus, and hsubmit.")]
 #[command(group(ArgGroup::new("vers") .args(["name", "all"])))]
 struct Args {
     /// The name of the scheduler, in the case more than one is running.

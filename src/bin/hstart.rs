@@ -9,7 +9,7 @@ use clap::Parser;
 use sysinfo::{System, SystemExt, CpuRefreshKind};
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(version, about, long_about = "Provision a new scheduler.\n\nA detailed tutorial and the source code is at https://github.com/JaneliaSciComp/aitch\n\nSee also hjobs, hkill, hnslots, hstatus, hstop, and hsubmit.")]
 struct Args {
     /// An optional name to give the scheduler, in the case more than one is needed.
     #[arg(short, long, default_value = "default")]

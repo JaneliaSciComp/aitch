@@ -6,12 +6,12 @@ use std::{
 use clap::Parser;
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(version, about, long_about = "Print the number of slots.\n\nA detailed tutorial and the source code is at https://github.com/JaneliaSciComp/aitch\n\nSee also hjobs, hkill, hstart, hstatus, hstop, and hsubmit.")]
 struct Args {
     /// The name of the scheduler, in the case more than one is running.
     #[arg(short, long, default_value = "default")]
     name: String,
-    /// Optionally output just the "used" or "free" jobs
+    /// Optionally output just the number of "used" or "free" slots
     kind: Option<String>,
 }
 

@@ -77,4 +77,8 @@ with the `--help` flag.
 
 # Development #
 
-Run tests with `cargo test`.
+Run the tests with `cargo test`.
+
+Check the formatting of the feedstock recipe with `conda smithy recipe-lint`.
+
+Generate a new key for the source code archive with `openssl sha256 <github-tar-gz-file>`.
