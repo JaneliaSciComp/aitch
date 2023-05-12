@@ -6,6 +6,7 @@ use std::{
     process::exit,
 };
 use clap::Parser;
+use aitch::eprintln_help;
 
 #[derive(Parser)]
 #[command(version, about, long_about = "Print the number of slots and number of jobs.\n\nA detailed tutorial and the source code is at https://github.com/JaneliaSciComp/aitch\n\nSee also hjobs, hkill, hnslots, hstart, hstop, and hsubmit.")]
@@ -25,9 +26,16 @@ fn main() {
 
     let schedulers = match args.name {
         Some(name) => Vec::from(name),
-        None => fs::read_dir(&path).unwrap()
-                    .map(|res| res.map(|e| e.path().display().to_string()))
-                    .collect::<Result<Vec<_>, Error>>().unwrap(),
+        None => {
+            match fs::read_dir(&path) {
+                Ok(content) =>
+                    content.map(|res| res.map(|e| e.path().display().to_string()))
+                           .collect::<Result<Vec<_>, Error>>().unwrap(),
+                Err(_error) => {
+                    eprintln_help(&mut path);
+                    exit(1) }
+            }
+        }
     };
 
     for scheduler in schedulers.iter() {
