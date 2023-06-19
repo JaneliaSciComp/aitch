@@ -33,6 +33,7 @@ fn main() {
     let mut var: String = "".to_string();
     let mut out: String = "".to_string();
     let mut err: String = "".to_string();
+    let mut append: bool = false;
     let mut dep = HashSet::new();
     let mut pid;
     let mut lines = Vec::new();
@@ -44,17 +45,18 @@ fn main() {
     for (i,line) in reader.lines().enumerate() {
         lines.push(line.as_ref().unwrap().clone());
         if !foundone {
-            match i % 9 {
+            match i % 10 {
                 0 => { id = line.unwrap(); },
                 1 => { nslots = line.unwrap(); },
                 2 => { command = line.unwrap(); },
                 3 => { var = line.unwrap(); },
                 4 => { out = line.unwrap(); },
                 5 => { err = line.unwrap(); },
-                6 => { dep = line.unwrap().split(" ").map(|x| x.to_string()).collect(); },
-                7 => {},  // queue
-                8 => {
-                    if i==8 { continue; }
+                6 => { if i>6 { append = line.unwrap().trim().parse().unwrap(); } },
+                7 => { dep = line.unwrap().split(" ").map(|x| x.to_string()).collect(); },
+                8 => {},  // queue
+                9 => {
+                    if i==9 { continue; }
                     prior_jobs.insert(id.clone());
                     if prior_jobs.intersection(&dep).collect::<Vec<&String>>().len() > 0 {
                         continue;
@@ -123,17 +125,17 @@ fn main() {
 
         // redirection
         if out != "" && out == err {
-            let outputs = fs::File::create(out).unwrap();
+            let outputs = fs::File::options().create(true).write(true).append(append).open(out).unwrap();
             let errors = outputs.try_clone().unwrap();
             cmd.stdout(Stdio::from(outputs))
                .stderr(Stdio::from(errors));
         } else {
             if out != "" {
-                let outputs = fs::File::create(out).unwrap();
+                let outputs = fs::File::options().create(true).write(true).append(append).open(out).unwrap();
                 cmd.stdout(outputs);
             }
             if err != "" {
-                let errors = fs::File::create(err).unwrap();
+                let errors = fs::File::options().create(true).write(true).append(append).open(err).unwrap();
                 cmd.stderr(errors);
             }
         }
@@ -155,8 +157,9 @@ fn main() {
                 loop {
                     line = lines_iter.next();
                     if line.is_none() { break; }
-                    if iline % 9 == 0 && *line.unwrap() == id {
+                    if iline % 10 == 0 && *line.unwrap() == id {
                         writeln!(writer, "{}", line.unwrap()).unwrap();
+                        writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
                         writeln!(writer, "{}", lines_iter.next().unwrap()).unwrap();
@@ -167,7 +170,7 @@ fn main() {
                         writeln!(writer, "{}", proc.id().to_string()).unwrap();
                         lines_iter.next();
                         lines_iter.next();
-                        iline += 9;
+                        iline += 10;
                     } else {
                         writeln!(writer, "{}", line.unwrap()).unwrap();
                         iline += 1;

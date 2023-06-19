@@ -22,6 +22,9 @@ struct Args {
     /// Path to file in which to save the standard error
     #[arg(short, long)]
     err: Option<String>,
+    /// Do not overwrite log files
+    #[arg(short, long)]
+    append: bool,
     /// The identification number of a job that must finish first
     #[arg(short, long)]
     dep: Option<Vec<String>>,
@@ -90,13 +93,14 @@ fn main() {
     };
 
     path.push("job_stack");
-    let mut f = fs::OpenOptions::new().write(true).append(true).open(&path).unwrap();
+    let mut f = fs::OpenOptions::new().append(true).open(&path).unwrap();
     writeln!(f, "{}", id).unwrap();
     writeln!(f, "{}", nslots_required).unwrap();
     writeln!(f, "{}", args.command.join(" ")).unwrap();
     writeln!(f, "{}", var).unwrap();
     writeln!(f, "{}", out).unwrap();
     writeln!(f, "{}", err).unwrap();
+    writeln!(f, "{}", args.append).unwrap();
     writeln!(f, "{}", dep).unwrap();
     writeln!(f, "").unwrap();
     writeln!(f, "").unwrap();

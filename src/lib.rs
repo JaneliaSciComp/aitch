@@ -127,7 +127,8 @@ pub fn delete_job_from_stack(path: &mut PathBuf, id: String) {
         let binding = reader_iter.next();
         let line = binding.as_ref();
         if line.is_none() { break; }
-        if iline % 9 == 0 && *line.unwrap() == id {
+        if iline % 10 == 0 && *line.unwrap() == id {
+            reader_iter.next();
             reader_iter.next();
             reader_iter.next();
             reader_iter.next();

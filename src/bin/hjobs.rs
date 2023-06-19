@@ -34,48 +34,50 @@ fn main() {
     let mut var: String = "".to_string();
     let mut out: String = "".to_string();
     let mut err: String = "".to_string();
+    let mut append: bool = false;
     let mut dep: String = "".to_string();
     let mut queue: String = "".to_string();
     let mut pid;
     let mut printedsomething: bool = false;
 
     for (i,line) in reader.lines().enumerate() {
-        match i % 9 {
+        match i % 10 {
             0 => { id = line.unwrap(); },
             1 => { nslots = line.unwrap(); },
             2 => { command = line.unwrap(); },
             3 => { var = line.unwrap(); },
             4 => { out = line.unwrap(); },
             5 => { err = line.unwrap(); },
-            6 => { dep = line.unwrap(); },
-            7 => { queue = line.unwrap(); },
-            8 => {
-                if i==8 { continue; }
+            6 => { if i>6 { append = line.unwrap().trim().parse().unwrap(); } },
+            7 => { dep = line.unwrap(); },
+            8 => { queue = line.unwrap(); },
+            9 => {
+                if i==9 { continue; }
                 pid = line.unwrap();
                 match kind {
                     None => {
-                        println!("{} {} {} {} {} {} {} {} {}",
-                                 id, nslots, command, var, out, err, dep, queue, pid);
+                        println!("{} {} {} {} {} {} {} {} {} {}",
+                                 id, nslots, command, var, out, err, append, dep, queue, pid);
                         printedsomething = true;
                     }
                     Some("pending") => {
                         if pid == "" {
-                            println!("{} {} {} {} {} {} {} {} {}",
-                                     id, nslots, command, var, out, err, dep, queue, pid);
+                            println!("{} {} {} {} {} {} {} {} {} {}",
+                                     id, nslots, command, var, out, err, append, dep, queue, pid);
                             printedsomething = true;
                         }
                     }
                     Some("running") => {
                         if pid != "" {
-                            println!("{} {} {} {} {} {} {} {} {}",
-                                      id, nslots, command, var, out, err, dep, queue, pid);
+                            println!("{} {} {} {} {} {} {} {} {} {}",
+                                      id, nslots, command, var, out, err, append, dep, queue, pid);
                             printedsomething = true;
                         }
                     }
                     Some(_x) => {
                         if id == kind.unwrap() {
-                            println!("{} {} {} {} {} {} {} {} {}",
-                                      id, nslots, command, var, out, err, dep, queue, pid);
+                            println!("{} {} {} {} {} {} {} {} {} {}",
+                                      id, nslots, command, var, out, err, append, dep, queue, pid);
                             printedsomething = true;
                             break;
                         }
@@ -89,7 +91,7 @@ fn main() {
     file.unlock().unwrap();
 
     if printedsomething {
-        println!("id nslots command var out err dep queue pid");
+        println!("id nslots command var out err append dep queue pid");
     } else if kind == None || kind == Some("pending") || kind == Some("running") {
         println!("no jobs found");
     } else {

@@ -50,9 +50,9 @@ fn main() {
         let sys = System::new_all();
 
         for (i,line) in reader.lines().enumerate() {
-            match i % 9 {
-                8 => {
-                    if i==8 { continue; }
+            match i % 10 {
+                9 => {
+                    if i==9 { continue; }
                     let cloned_line = line.unwrap().clone();
                     if !args.force {
                         eprintln!("jobs are still queued.  use --force to stop anyway");

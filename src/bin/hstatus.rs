@@ -56,9 +56,9 @@ fn main() {
         let mut pending = 0;
         let mut running = 0;
         for (i,line) in reader.lines().enumerate() {
-            match i % 9 {
-                8 => {
-                    if i==8 { continue; }
+            match i % 10 {
+                9 => {
+                    if i==9 { continue; }
                     pid = line.unwrap();
                     total += 1;
                     if pid == "" {

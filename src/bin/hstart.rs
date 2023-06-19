@@ -59,7 +59,7 @@ fn main() {
     path.pop();
 
     path.push("job_stack");
-    fs::write(&path, "id\nnslots\ncommand\nvar\nout\nerr\ndep\nqueue\npid\n").unwrap();
+    fs::write(&path, "id\nnslots\ncommand\nvar\nout\nerr\nappend\ndep\nqueue\npid\n").unwrap();
     path.pop();
 
     path.push("last_jobid");

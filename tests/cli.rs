@@ -583,8 +583,42 @@ fn redirect() -> Result<(), Box<dyn std::error::Error>> {
     wait_for_all_jobs_to_finish(cmd);
 
     let predicate_fn = predicate::path::is_file();
-    path.push("redirect.out");  assert_eq!(true, predicate_fn.eval(&path));  path.pop();
-    path.push("redirect.err");  assert_eq!(true, predicate_fn.eval(&path));  path.pop();
+    path.push("redirect.out");
+    assert_eq!(true, predicate_fn.eval(&path));
+    let outlen = path.metadata().unwrap().len();
+    path.pop();
+    path.push("redirect.err");
+    assert_eq!(true, predicate_fn.eval(&path));
+    let errlen = path.metadata().unwrap().len();
+    path.pop();
+
+    let mut cmd = Command::cargo_bin("hsubmit")?;
+    cmd.args(["--name", "redirect"])
+       .args(["1", "--out", outfile.as_str(), "--err", errfile.as_str()])
+       .args(["--append"]);
+    if env::consts::OS == "windows" {
+        cmd.args(["powershell", "--", "-command", "ls"]);
+    } else {
+        cmd.arg("ls");
+    }
+    let mut child = cmd.stdout(Stdio::piped())
+                       .spawn().unwrap();
+    assert_stdout(&mut child, "2\n");
+
+    let mut cmd = Command::cargo_bin("hjobs")?;
+    cmd.args(["--name", "redirect"])
+       .arg("2");
+    wait_for_all_jobs_to_finish(cmd);
+
+    let predicate_fn = predicate::path::is_file();
+    path.push("redirect.out");
+    assert_eq!(true, predicate_fn.eval(&path));
+    assert_eq!(outlen*2, path.metadata().unwrap().len());
+    path.pop();
+    path.push("redirect.err");
+    assert_eq!(true, predicate_fn.eval(&path));
+    assert_eq!(errlen*2, path.metadata().unwrap().len());
+    path.pop();
 
     let mut cmd = Command::cargo_bin("hstop")?;
     cmd.args(["--name", "redirect"])

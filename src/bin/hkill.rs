@@ -44,11 +44,11 @@ fn main() {
     let sys = System::new_with_specifics(r);
 
     for (i,line) in reader.lines().enumerate() {
-        match i % 9 {
+        match i % 10 {
             0 => { id = line.unwrap(); },
-            7 => { queue = line.unwrap(); },
-            8 => {
-                if i==8 { continue; }
+            8 => { queue = line.unwrap(); },
+            9 => {
+                if i==9 { continue; }
                 let cloned_line = line.unwrap().clone();
                 if cloned_line == "" { continue; }
                 let pid = Pid::from_str(&cloned_line).unwrap();
