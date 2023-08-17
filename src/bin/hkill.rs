@@ -49,32 +49,36 @@ fn main() {
             8 => { queue = line.unwrap(); },
             9 => {
                 if i==9 { continue; }
-                let cloned_line = line.unwrap().clone();
-                if cloned_line == "" { continue; }
-                let pid = Pid::from_str(&cloned_line).unwrap();
                 if id == args.jobid {
-                    match sys.process(pid) {
-                        Some(p) => {
-                            if args.kill {
-                                if p.kill_with(Kill).is_none() {
-                                    eprintln!("SIGKILL not supported on this platform");
-                                }
-                            } else {
-                                if p.kill_with(Term).is_none() {
-                                    eprintln!("SIGTERM not supported on this platform.  use --kill to send SIGKILL instead");
-                                }
-                            }
-                        }
-                        None => {
-                            if args.force {
-                                aitch::update_slot_availability(&mut path, &queue, false);
-                                aitch::delete_job_from_stack(&mut path, id);
-                            } else {
-                                eprintln!("couldn't find PID.  use --force to delete job from aitch's stack");
-                            }
-                        }
-                    };
                     foundone = true;
+                    let cloned_line = line.unwrap().clone();
+                    if cloned_line == "" {
+                        aitch::update_slot_availability(&mut path, &queue, false);
+                        aitch::delete_job_from_stack(&mut path, id);
+                    } else {
+                        let pid = Pid::from_str(&cloned_line).unwrap();
+                        match sys.process(pid) {
+                            Some(p) => {
+                                if args.kill {
+                                    if p.kill_with(Kill).is_none() {
+                                        eprintln!("SIGKILL not supported on this platform");
+                                    }
+                                } else {
+                                    if p.kill_with(Term).is_none() {
+                                        eprintln!("SIGTERM not supported on this platform.  use --kill to send SIGKILL instead");
+                                    }
+                                }
+                            }
+                            None => {
+                                if args.force {
+                                    aitch::update_slot_availability(&mut path, &queue, false);
+                                    aitch::delete_job_from_stack(&mut path, id);
+                                } else {
+                                    eprintln!("couldn't find PID.  use --force to delete job from aitch's stack");
+                                }
+                            }
+                        };
+                    }
                     break;
                 }
             }
