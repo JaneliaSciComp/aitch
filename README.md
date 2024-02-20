@@ -77,10 +77,14 @@ with the `--help` flag.
 
 # Development #
 
-Build with `cargo build`, run the tests with `cargo test`.
+Run the tests with `cargo test`.
 
 Build and test on a local disk with the `--target-dir <DIR>` flag.  Useful if
 the source is on a networked fileshare which doesn't support locking.
+
+Update rust and cargo with `rustup update`.
+
+The conda-forge feedstock is at https://github.com/conda-forge/aitch-feedstock.
 
 Check the formatting of the feedstock recipe with `conda smithy recipe-lint`.
 
