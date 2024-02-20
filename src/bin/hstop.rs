@@ -8,7 +8,7 @@ use std::{
 };
 use std::str::FromStr;
 use sysinfo::Signal::*;
-use sysinfo::{Pid, ProcessExt, System, SystemExt};
+use sysinfo::{Pid, System};
 use clap::{Parser, ArgGroup};
 
 #[derive(Parser)]

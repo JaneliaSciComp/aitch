@@ -6,7 +6,7 @@ use std::{
 };
 use std::str::FromStr;
 use sysinfo::Signal::*;
-use sysinfo::{Pid, ProcessExt, System, SystemExt, RefreshKind, ProcessRefreshKind};
+use sysinfo::{Pid, System, RefreshKind, ProcessRefreshKind};
 use clap::Parser;
 
 #[derive(Parser)]

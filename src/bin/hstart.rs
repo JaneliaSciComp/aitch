@@ -6,7 +6,7 @@ use std::{
     io::{BufWriter, Write},
 };
 use clap::Parser;
-use sysinfo::{System, SystemExt, CpuRefreshKind};
+use sysinfo::{System, CpuRefreshKind};
 
 #[derive(Parser)]
 #[command(version, about, long_about = "Provision a new scheduler.\n\nA detailed tutorial and the source code is at https://github.com/JaneliaSciComp/aitch\n\nSee also hjobs, hkill, hnslots, hstatus, hstop, and hsubmit.")]

@@ -11,11 +11,11 @@ repository = "https://github.com/JaneliaSciComp/aitch"
 [dependencies]
 clap = { version = "4.2.1", features = ["derive"] }
 fslock = "0.2.1"
-itertools = "0.10.5"
+itertools = "0.12.1"
 shell-words = "1.1.0"
-sysinfo = "0.28.4"
+sysinfo = "0.30.5"
 
 [dev-dependencies]
 assert_cmd = "2.0"
-predicates = "3.0"
-assert_fs = "1.0"
+predicates = "3.1"
+assert_fs = "1.1"
