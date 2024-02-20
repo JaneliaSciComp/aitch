@@ -777,7 +777,7 @@ fn kill() -> Result<(), Box<dyn std::error::Error>> {
        .assert().success().stdout(predicate::str::contains("\n").count(2));
 
     let mut cmd = Command::cargo_bin("hkill")?;
-    cmd.args(["--name", "kill"])
+    cmd.args(["--name", "kill", "--kill"])
        .arg("1")
        .assert().success();
 
