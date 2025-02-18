@@ -23,6 +23,7 @@ fn main() {
     let tmpdir = env::temp_dir();
     let mut path = PathBuf::from(&tmpdir);
     path.push("aitch");
+    println!("path to state folder: {}", path.to_str().unwrap());
 
     let schedulers = match args.name {
         Some(name) => Vec::from(name),
